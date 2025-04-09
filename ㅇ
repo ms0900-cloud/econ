@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>행동경제학 실험</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+    h1 {
+      font-weight: bold;
+    }
+    .image-grid {
+      display: grid;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    #b-options.image-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .image-grid img {
+      width: 100%;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .image-grid img:hover {
+      transform: scale(1.05);
+      border-color: #555;
+    }
+    .image-grid img.selected {
+      border-color: #007bff;
+    }
+    .label {
+      margin-top: 4px;
+      font-size: 14px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="intro">
+    <h1>행동경제학 실험 - 가장 좋아하는 간식</h1>
+    <p>최대한 빠르게 고민 없이 선택해주세요!</p>
+    <button onclick="startExperiment()">시작하기</button>
+  </div>
+
+  <div id="step-a" class="hidden">
+    <p>A단계: 아래 간식 중 하나를 선택해주세요.</p>
+    <div class="image-grid" id="a-options"></div>
+  </div>
+
+  <div id="step-transition" class="hidden">
+    <p>선택 감사합니다!</p>
+    <button onclick="startStepB()">다음을 눌러 계속</button>
+  </div>
+
+  <div id="step-b" class="hidden">
+    <p>B단계: 아래 간식 중 하나를 선택해주세요.</p>
+    <div class="image-grid" id="b-options"></div>
+  </div>
+
+  <div id="thank-you" class="hidden">
+    <h2>감사합니다!</h2>
+  </div>
+
+  <script>
+    const aOptions = [
+      { name: "초코파이", url: "https://img.danawa.com/prod_img/500000/974/546/img/3546974_1.jpg?_v=20250212101544" },
+      { name: "포카칩", url: "https://i.namu.wiki/i/wIAkG9WLeBjeDsMfIFwOGWZ9bopaPhcvIqnz7EZ5uo0D2oqNXVTCYbAIvLJ7ZTyTTbCxfsnr4wnhutWpCWLAve66kvriwozfi0Duf-QOcOfApARunqk_xldq39e8hROAiP49Jfot_ID72RcJ4wR4Tg.webp" },
+      { name: "오예스", url: "https://img.danawa.com/prod_img/500000/965/117/img/10117965_1.jpg?shrink=360:360&_v=20191210171250" }
+    ];
+
+    const bOptions = [
+      { name: "새우깡", url: "https://image.nongshim.com/non/pro/1594682430086.jpg" },
+      { name: "고래밥", url: "https://i.namu.wiki/i/JpliEAntjHjz2wc98-njBdZAH16rVPfckfBTrVNIaRx8eeLc2FnXUKWII_3khSPYSC1emIBJabJn-Ub8MqZKOapGEqUzU3oJ5K0zZ0QlaPNrLC9ioZGo24jl8ppBGkPZigHk36Sh1iwu1ykKR6NpFQ.webp" },
+      { name: "초코송이", url: "https://img.danawa.com/prod_img/500000/826/577/img/3577826_1.jpg?_v=20161108161614" },
+      { name: "빼빼로", url: "https://sitem.ssgcdn.com/32/11/49/item/1000264491132_i1_750.jpg" },
+      { name: "허니버터칩", url: "https://i.namu.wiki/i/oPAoqWK2jvH75SAv2JXhX-PiV-0Op-unsnmuNY_qsIFH2dqcBUrXdzDkGvblFfd4aKOKyq-grBn47ebeeUgxrGJb1-Q7noYZK9IjjkVhBOxNPDdiUiDd55PHPLdjiu-BaigYy3zWjMkcYSki8H64pg.webp" },
+      { name: "콘칩", url: "https://i.namu.wiki/i/yPpdkFFL5m9nLYrZMrzoapMKTJA_m-wzCqnTaUc4FBrSFsctAv_K4IkeY-ahgjRj1obT3J-Pb6N5I-51SjQgXRQVWmtV803SxlcvmMrfI71XemJVxAkOc9idDVPUzVIOeRvBeLvDpRFtc4VLgAghwA.webp" },
+      { name: "죠리퐁", url: "https://cphoto.asiae.co.kr/listimglink/1/2023060916485258778_1686296932.jpg" },
+      { name: "포스틱", url: "https://image.nongshim.com/non/pro/product_B.jpg" },
+      { name: "오감자", url: "https://i.namu.wiki/i/rILNU0Oc2cQBGUwWC0bNy0c9DeVayWsyyfHE76b6VZrN0csT22wmn-L9bP3ULMdZLtN_r3mWXiRwR6opVdpYl-a1HebRh48qxobLji5X5MIGgoiQTbAgFSUwXYMIouR2KN89MSQ_tsJ3HFWAoJeDqg.webp" },
+      { name: "양파링", url: "https://img.danawa.com/prod_img/500000/086/519/img/2519086_1.jpg?_v=20161129160529" },
+      { name: "나초", url: "https://static.megamart.com/product/image/0634/06341961/06341961_1_960.jpg" },
+      { name: "홈런볼", url: "https://i.namu.wiki/i/2AdXzLn_gxqBxKtAApdqRDUUb5x2eQ3q0fxR9LjFLRWvplw82uM-Opp5hWZVLUwmyxMFhqhJvnbQNzavOQpsadeQOZxw2tkTOmdnVWJLnv-ambPwNG573i5KlaqYe_DYtuF_iORy48Tbtd1uItlHFQ.webp" }
+    ];
+
+    let aStart, bStart, aChoice;
+
+    function startExperiment() {
+      document.getElementById("intro").classList.add("hidden");
+      showStepA();
+    }
+
+    function showStepA() {
+      const container = document.getElementById("a-options");
+      container.innerHTML = "";
+      const shuffled = [...aOptions].sort(() => 0.5 - Math.random());
+      shuffled.forEach(option => {
+        const wrapper = document.createElement("div");
+        const img = document.createElement("img");
+        const label = document.createElement("div");
+        img.src = option.url;
+        img.onclick = () => selectA(option.name);
+        label.className = "label";
+        label.innerText = option.name;
+        wrapper.appendChild(img);
+        wrapper.appendChild(label);
+        container.appendChild(wrapper);
+      });
+      document.getElementById("step-a").classList.remove("hidden");
+      aStart = Date.now();
+    }
+
+    function selectA(name) {
+      const aTime = Date.now() - aStart;
+      aChoice = name;
+      document.getElementById("step-a").classList.add("hidden");
+      document.getElementById("step-transition").classList.remove("hidden");
+      window._tempAData = { aChoice: name, aTime };
+    }
+
+    function startStepB() {
+      document.getElementById("step-transition").classList.add("hidden");
+      const container = document.getElementById("b-options");
+      container.innerHTML = "";
+      const filtered = bOptions.filter(opt => opt.name !== aChoice);
+      const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+      shuffled.forEach(option => {
+        const wrapper = document.createElement("div");
+        const img = document.createElement("img");
+        const label = document.createElement("div");
+        img.src = option.url;
+        img.onclick = () => selectB(option.name);
+        label.className = "label";
+        label.innerText = option.name;
+        wrapper.appendChild(img);
+        wrapper.appendChild(label);
+        container.appendChild(wrapper);
+      });
+      document.getElementById("step-b").classList.remove("hidden");
+      bStart = Date.now();
+    }
+
+    function selectB(name) {
+      const bTime = Date.now() - bStart;
+      const data = {
+        aChoice: window._tempAData.aChoice,
+        bChoice: name,
+        timeA: window._tempAData.aTime,
+        timeB: bTime,
+        timestamp: new Date().toISOString()
+      };
+      fetch("https://script.google.com/macros/s/AKfycbyYUmV3Ubo9n2OzPUY1yNFWIS42LWSJcKpn-KcEUM1OVgJG0xrNks6jsivc_GRp7VVt/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      document.getElementById("step-b").classList.add("hidden");
+      document.getElementById("thank-you").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
